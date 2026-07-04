@@ -35,7 +35,7 @@ That's it! The script will automatically:
 - Launch all 4 services (Backend, Simulator, Frontend, Discord Bot)
 - Open the live dashboard in your default browser at `http://localhost:5173`
 - It might take a few moments to install and run everything, please be patient and dont cut any window in the mean time.
-- If discord bot is not working invite manually - `https://discord.com/oauth2/authorize?client_id=1522626157948964874&permissions=8&scope=bot%%20applications.commands`
+- If discord bot is not working invite manually - `https://discord.com/oauth2/authorize?client_id=1522626157948964874&permissions=8&scope=bot%20applications.commands`
 
 > **Running it again?** Just double-click the same file. It will detect everything is already set up and skip straight to launching the services.
 
