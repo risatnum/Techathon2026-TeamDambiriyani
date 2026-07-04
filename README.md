@@ -17,68 +17,29 @@ A real-time office monitoring system managing 15 simulated devices across 3 room
 
 ---
 
-## Setup & Run Instructions
+## Quick Start (One Click Setup)
 
-### 1. Backend (FastAPI)
-The backend acts as the central hub.
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # (or venv\Scripts\activate on Windows)
-pip install -r requirements.txt
-uvicorn app.main:socket_app --host 0.0.0.0 --port 8000
-```
-**Environment Variables (`backend/.env`)**:
-Copy the template `backend/.env.example` to `backend/.env` if you want to customize configuration parameters:
-- `ELECTRICITY_RATE_PER_KWH`: Cost per kWh (Default: 8.0)
-- `OFFICE_OPEN_HOUR`: Office opening hour (Default: 9)
-- `OFFICE_CLOSE_HOUR`: Office closing hour (Default: 17)
-- `CORS_ORIGINS`: Allowed CORS origins (Default: `http://localhost:5173`)
+### Prerequisites
+Make sure you have the following installed on your computer:
+- **[Git](https://git-scm.com/downloads)** — to download the project files
+- **[Python 3.10+](https://www.python.org/downloads/)** — ⚠️ check **"Add python.exe to PATH"** during installation
+- **[Node.js (LTS)](https://nodejs.org/)** — for the frontend dashboard and Discord bot
 
+### Installation & Run
+1. Download the **[`start_project.bat`](start_project.bat)** file.
+2. Place it in any folder on your computer.
+3. **Double-click** `start_project.bat`.
 
-### 2. Simulator (Python)
-Generates randomized device states and pushes them to the backend.
-```bash
-cd simulator
-python -m venv venv
-source venv/bin/activate  # (or venv\Scripts\activate on Windows)
-pip install -r requirements.txt
-python main.py
-```
-**Environment Variables (`simulator/.env`)**:
-- `BACKEND_URL` (Default: http://localhost:8000)
-- `PUSH_INTERVAL` (Default: 5)
+That's it! The script will automatically:
+- Download the entire project from GitHub
+- Set up all Python virtual environments and Node.js dependencies
+- Download the required environment configuration files
+- Ask if you'd like to invite the Discord Bot to your server
+- Launch all 4 services (Backend, Simulator, Frontend, Discord Bot)
+- Open the live dashboard in your default browser at `http://localhost:5173`
+- It might take a few moments to install and run everything, please be patient and dont cut any window in the mean time.
 
-### 3. Frontend Dashboard (React + Vite)
-The live real-time dashboard.
-```bash
-cd frontend
-npm install
-npm run dev
-```
-It will start at `http://localhost:5173`. 
-
-### 4. Discord Bot (Node.js)
-Answers Discord commands using Gemini LLM and live backend data.
-
-> [!IMPORTANT]
-> **Environment File Download & Setup**:
-> To run the Discord bot, you need the `.env` configuration file containing the API key and Discord token.
-> 1. Download the `.env` file from this [Google Drive Link](https://drive.google.com/file/d/1LTXDUaTwGxWuP0Hmf1bPSIoDOX3TuBWj/view?usp=sharing).
-> 2. Place the downloaded `.env` file directly inside the `bot/` directory (i.e. at `bot/.env`).
->    * **Note**: Make sure the file is named exactly `.env` (and not `.env.txt` or similar).
-> 3. Alternatively, you can copy the `bot/.env.example` template to `bot/.env` and fill in your own Discord and Gemini API tokens.
-
-```bash
-cd bot
-npm install
-npm start
-```
-
-**Environment Variables (`bot/.env`)**:
-- `DISCORD_TOKEN`: Discord Bot Token
-- `GEMINI_API_KEY`: Google Gemini API Key
-- `BACKEND_URL`: FastAPI server URL (Default: `http://localhost:8000`)
+> **Running it again?** Just double-click the same file. It will detect everything is already set up and skip straight to launching the services.
 
 ---
 
@@ -93,7 +54,7 @@ npm start
 
 ### REST Endpoints
 | Method | Route | Purpose | Example Payload |
-|--------|-------|---------|-----------------|
+|--------|-------|---------|---------   --------|
 | POST | `/api/simulator/push` | Bulk state update from simulator | `{ "devices": [ { "id": "...", "type": "light", "room": "...", "status": "on", "power_watts": 15, "last_changed": "..." } ] }` |
 | GET | `/api/mode` | Get current mode | - |
 | POST | `/api/mode` | Change mode (automatic/manual) | `{ "mode": "manual" }` |

@@ -1,97 +1,157 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 :: ==========================================
-:: Setup your GitHub repository URL here
+:: Configuration
 :: ==========================================
 set REPO_URL=https://github.com/risatnum/dumbiriyani.git
 set PROJECT_DIR=dumbiriyani
+set ENV_DRIVE_URL=https://drive.google.com/uc?export=download^&id=YOUR_GOOGLE_DRIVE_FILE_ID
+set DISCORD_INVITE_URL=https://url-shortener.me/NSPX
 
-echo ==========================================
-echo Office Monitoring System - Auto Setup & Run
-echo ==========================================
+echo.
+echo  =====================================================
+echo       Office Monitoring System - One Click Setup
+echo  =====================================================
 echo.
 
-:: 1. Check if the project is downloaded, if not clone it
+:: -----------------------------------------------
+:: 1. Check if the project is already downloaded
+:: -----------------------------------------------
 if not exist "%PROJECT_DIR%" (
-    echo [1/5] Project not found locally. Downloading from GitHub...
+    echo  [1/6] Project not found. Downloading from GitHub...
+    echo.
     git clone %REPO_URL% %PROJECT_DIR%
     if errorlevel 1 (
-        echo [ERROR] Failed to clone repository. Please check if git is installed and the URL is correct.
+        echo.
+        echo  [ERROR] Failed to clone repository.
+        echo  Make sure Git is installed: https://git-scm.com/
         pause
         exit /b 1
     )
+    echo.
+    echo  Download complete!
 ) else (
-    echo [1/5] Project folder "%PROJECT_DIR%" already exists. Skipping download.
+    echo  [1/6] Project already downloaded. Skipping.
 )
 
 cd "%PROJECT_DIR%"
 
-:: 2. Setup and run Backend (FastAPI)
+:: -----------------------------------------------
+:: 2. Download .env file for the Discord bot
+:: -----------------------------------------------
 echo.
-echo [2/5] Setting up Backend...
+if not exist "bot\.env" (
+    echo  [2/6] Downloading environment config for Discord Bot...
+    powershell -Command "Invoke-WebRequest -Uri '%ENV_DRIVE_URL%' -OutFile 'bot\.env'"
+    if errorlevel 1 (
+        echo  [WARNING] Could not download .env file. The Discord Bot may not work.
+        echo  You can manually place a .env file in the bot\ folder later.
+    ) else (
+        echo  Environment config downloaded and placed in bot\ folder.
+    )
+) else (
+    echo  [2/6] Bot environment config already exists. Skipping.
+)
+
+:: -----------------------------------------------
+:: 3. Setup Backend (FastAPI)
+:: -----------------------------------------------
+echo.
+echo  [3/6] Setting up Backend...
 if not exist "backend\venv" (
-    echo Creating virtual environment for backend...
+    echo  Creating virtual environment for backend...
     python -m venv backend\venv
-    echo Installing backend dependencies...
+    echo  Installing backend dependencies...
     backend\venv\Scripts\pip install -r backend\requirements.txt
 ) else (
-    echo Backend dependencies already installed. Skipping.
+    echo  Backend dependencies already installed. Skipping.
 )
-echo Starting Backend...
+echo  Starting Backend...
 start "Backend" cmd /c "title Backend & call backend\venv\Scripts\activate & cd backend & uvicorn app.main:socket_app --host 0.0.0.0 --port 8000"
 
-:: 3. Setup and run Simulator
+:: -----------------------------------------------
+:: 4. Setup Simulator
+:: -----------------------------------------------
 echo.
-echo [3/5] Setting up Simulator...
+echo  [4/6] Setting up Simulator...
 if not exist "simulator\venv" (
-    echo Creating virtual environment for simulator...
+    echo  Creating virtual environment for simulator...
     python -m venv simulator\venv
-    echo Installing simulator dependencies...
+    echo  Installing simulator dependencies...
     simulator\venv\Scripts\pip install -r simulator\requirements.txt
 ) else (
-    echo Simulator dependencies already installed. Skipping.
+    echo  Simulator dependencies already installed. Skipping.
 )
-echo Starting Simulator...
+echo  Starting Simulator...
 start "Simulator" cmd /c "title Simulator & call simulator\venv\Scripts\activate & cd simulator & python main.py"
 
-:: 4. Setup and run Frontend (React)
+:: -----------------------------------------------
+:: 5. Setup Frontend (React + Vite)
+:: -----------------------------------------------
 echo.
-echo [4/5] Setting up Frontend...
+echo  [5/6] Setting up Frontend Dashboard...
 if not exist "frontend\node_modules" (
-    echo Installing frontend dependencies...
+    echo  Installing frontend dependencies...
     cd frontend
     call npm install
     cd ..
 ) else (
-    echo Frontend dependencies already installed. Skipping.
+    echo  Frontend dependencies already installed. Skipping.
 )
-echo Starting Frontend...
+echo  Starting Frontend...
 start "Frontend" cmd /c "title Frontend & cd frontend & npm run dev"
 
-:: 5. Setup and run Discord Bot
+:: -----------------------------------------------
+:: 6. Setup Discord Bot + Invitation Prompt
+:: -----------------------------------------------
 echo.
-echo [5/5] Setting up Discord Bot...
+echo  [6/6] Setting up Discord Bot...
 if not exist "bot\node_modules" (
-    echo Installing bot dependencies...
+    echo  Installing bot dependencies...
     cd bot
     call npm install
     cd ..
 ) else (
-    echo Bot dependencies already installed. Skipping.
+    echo  Bot dependencies already installed. Skipping.
 )
-echo Starting Discord Bot...
+echo  Starting Discord Bot...
 start "Discord Bot" cmd /c "title Discord Bot & cd bot & npm start"
 
-:: 6. Open the browser
+:: -----------------------------------------------
+:: 7. Discord Bot Invitation
+:: -----------------------------------------------
 echo.
-echo Waiting 5 seconds for services to start up...
+echo  =====================================================
+echo   Would you like to invite the Discord Bot to your
+echo   server to receive live alerts and updates?
+echo  =====================================================
+echo.
+set /p INVITE_CHOICE="  Type Y to invite, or N to skip: "
+
+if /i "!INVITE_CHOICE!"=="y" (
+    echo.
+    echo  Opening Discord Bot invite link in your browser...
+    start %DISCORD_INVITE_URL%
+) else (
+    echo.
+    echo  Got it! Continuing without Discord.
+    echo  You won't receive Discord alerts or updates.
+)
+
+:: -----------------------------------------------
+:: 8. Open the Dashboard
+:: -----------------------------------------------
+echo.
+echo  Waiting 5 seconds for services to start up...
 timeout /t 5 /nobreak >nul
-echo Opening dashboard in your default browser...
+echo  Opening dashboard in your default browser...
 start http://localhost:5173
 
 echo.
-echo ==========================================
-echo All services have been launched in separate windows!
-echo ==========================================
+echo  =====================================================
+echo   All services are running! You can close this
+echo   window, but keep the other terminal windows open.
+echo  =====================================================
+echo.
 pause
