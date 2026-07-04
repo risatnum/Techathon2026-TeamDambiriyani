@@ -18,7 +18,18 @@ const API_TIMEOUT_MS = 10000;
 // =============================================================================
 
 const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const model = ai.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    systemInstruction: `You are the virtual assistant for the "Lights, Fans, Discord" smart office monitoring system.
+Your sole purpose is to help users monitor and query the office devices (lights, fans), check power usage, estimated bills, and active alerts.
+
+CRITICAL RULES:
+1. STRICT CONTEXT BOUNDARY: You must only answer questions within the context of this office monitoring system (device states, room status, power usage, billing, active alerts).
+2. OUT OF SCOPE HANDLER: If the user query is not about this system (e.g., general knowledge, weather, news, coding, general chat, unrelated math), you must explicitly acknowledge that this topic is not part of the office monitoring system and decline to answer.
+3. NO HARDCODED OR DUMMY DATA: Never invent, assume, or hardcode any numbers, statuses, device names, or rooms. Every value or state you report must come directly from the live backend data.
+4. DERIVED CALCULATIONS: If a user asks for a derived number (e.g., total count of off devices, average room usage, room with highest draw, active alert counts), perform the calculation dynamically on the live data.
+5. NATURAL TONE: Keep your tone conversational, natural, and helpful. Avoid robotic language, and do not use markdown formatting (like bolding '**' or backticks) in your output unless absolutely necessary.`
+});
 
 // =============================================================================
 // Discord Client Setup
@@ -204,11 +215,11 @@ function formatTemplate(command, data) {
 async function formatResponse(command, data) {
     try {
         const promptMap = {
-            status: `You are a friendly office assistant bot monitoring a smart office system. Here is the current device status for all rooms:\n${JSON.stringify(data, null, 2)}\n\nInstructions:\n1. Summarize which fans and lights are ON in each room naturally.\n2. If the user asks anything outside the project context, acknowledge it's not part of the system and refuse to answer.\n3. Do NOT hardcode any data; only use numbers fetched from the backend data provided.\n4. If numbers need to be derived, do the calculation.\n5. Keep response under 50 tokens and don't use markdown.`,
+            status: `Summarize which fans and lights are currently ON or OFF in each room naturally and conversationally, based on this live data:\n${JSON.stringify(data, null, 2)}`,
 
-            room: `You are a friendly office assistant bot monitoring a smart office system. Here is the device status for a room:\n${JSON.stringify(data, null, 2)}\n\nInstructions:\n1. Describe each device's status, wattage, and total power draw naturally.\n2. If the user asks anything outside the project context, acknowledge it's not part of the system and refuse to answer.\n3. Do NOT hardcode any data; only use numbers fetched from the backend data provided.\n4. If numbers need to be derived, do the calculation.\n5. Keep response under 50 tokens and don't use markdown.`,
+            room: `Describe the status of the devices, their individual wattages, and calculate/report the total room power draw naturally, based on this live data:\n${JSON.stringify(data, null, 2)}`,
 
-            usage: `You are a friendly office assistant bot monitoring a smart office system. Here is the current power usage data:\n${JSON.stringify(data, null, 2)}\n\nInstructions:\n1. Summarize the current power consumption, today's usage in kWh, and estimated bill naturally.\n2. If the user asks anything outside the project context, acknowledge it's not part of the system and refuse to answer.\n3. Do NOT hardcode any data; only use numbers fetched from the backend data provided.\n4. If numbers need to be derived, do the calculation.\n5. Keep response under 50 tokens and don't use markdown.`,
+            usage: `Summarize the current power consumption in watts, today's total usage in kWh, and the estimated bill naturally and conversationally, based on this live data:\n${JSON.stringify(data, null, 2)}`,
         };
 
         const prompt = promptMap[command];
@@ -287,18 +298,15 @@ async function handleCommand(input) {
 
         const contextData = { status: statusData, usage: usageData, alerts: alertsData };
 
-        const prompt = `You are a friendly office assistant bot monitoring a smart office system.
-Here is the current live data from the backend:
+        const prompt = `Here is the current live data from the backend:
 ${JSON.stringify(contextData, null, 2)}
 
 User query: "${trimmed}"
 
-Instructions:
-1. Answer the user's query naturally based ONLY on the provided live data.
-2. If the user asks anything outside the context of this project, you must acknowledge that it is not part of the system and you cannot answer it.
-3. Do NOT hardcode any data in the output. Only show the numbers fetched from the backend data above.
-4. If some numbers need to be derived, perform the calculation.
-5. Keep your response under 100 words and do not use markdown formatting.`;
+Please answer the user's query naturally, conversationally, and strictly based on the provided live data. 
+- If the user's query is outside the context of this smart office project (e.g. general questions, general advice, coding, or unrelated queries), you must state that it is not part of the system and refuse to answer.
+- Do not hardcode or assume any data; only use numbers/states from the backend.
+- If the user asks for derived metrics (like off counts, most power-hungry room, etc.), calculate them yourself.`;
 
         const result = await model.generateContent(prompt);
         const text = result.response.text();
