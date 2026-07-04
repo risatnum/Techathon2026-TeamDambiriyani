@@ -4,11 +4,7 @@ A real-time office monitoring system managing 15 simulated devices across 3 room
 
 ## Architecture Overview
 
-```
-[Python Simulator] --(HTTP POST / periodic push)--> [FastAPI Backend] <--REST/Socket.IO--> [Frontend Dashboard]
-                                                             |
-                                                             +--REST--> [Discord Bot (JS)]
-```
+![Architecture Overview](assets/architecture.png)
 
 - **Single Source of Truth**: The FastAPI backend maintains the full state of all devices, computes power and bills, and tracks continuous device usage.
 - **Simulator**: Generates device events and pushes them to the backend. It polls the backend to respect "Automatic" or "Manual" mode.
