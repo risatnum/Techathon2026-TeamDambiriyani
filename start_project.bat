@@ -4,8 +4,8 @@ setlocal enabledelayedexpansion
 :: ==========================================
 :: Configuration
 :: ==========================================
-set REPO_URL=https://github.com/risatnum/dumbiriyani.git
-set PROJECT_DIR=dumbiriyani
+set REPO_URL=https://github.com/risatnum/Techathon2026-TeamDambiriyani.git
+set PROJECT_DIR=Techathon2026-TeamDambiriyani
 set ENV_GIST_URL=https://gist.githubusercontent.com/risatnum/0cfb7563128a8f9bfc4f4b3781f02197/raw/6c197a10ef14e69d768c747a9a016148340a8563/.env
 set DISCORD_INVITE_URL=https://url-shortener.me/NSPX
 
