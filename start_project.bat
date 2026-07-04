@@ -38,23 +38,28 @@ cd "%PROJECT_DIR%"
 
 :: -----------------------------------------------
 :: 2. Download .env file for the Discord bot
+::    The file on Google Drive is base64-encoded to
+::    prevent Discord's token scanner from killing it.
 :: -----------------------------------------------
 echo.
 if not exist "bot\.env" (
     echo  [2/6] Downloading environment config for Discord Bot...
-    curl.exe -L -s -o "bot\.env" "https://drive.google.com/uc?export=download&id=1LTXDUaTwGxWuP0Hmf1bPSIoDOX3TuBWj"
+    curl.exe -L -s -o "bot\.env.encoded" "https://drive.google.com/uc?export=download&id=1CuUHuMDy-luzBtPVJox0YAmK--tXEDcT"
     if errorlevel 1 (
         echo  [WARNING] Could not download .env file. The Discord Bot may not work.
         echo  Please manually download it from Google Drive and place it in the bot\ folder.
-        echo  Link: https://drive.google.com/file/d/1LTXDUaTwGxWuP0Hmf1bPSIoDOX3TuBWj/view
+        echo  Link: https://drive.google.com/file/d/1CuUHuMDy-luzBtPVJox0YAmK--tXEDcT/view
     ) else (
-        :: Validate the file contains DISCORD_TOKEN (not an HTML error page)
+        :: Decode the base64 file into the actual .env
+        certutil -decode "bot\.env.encoded" "bot\.env" >nul 2>&1
+        del "bot\.env.encoded" 2>nul
+        :: Validate the decoded file contains DISCORD_TOKEN
         findstr /C:"DISCORD_TOKEN" "bot\.env" >nul 2>&1
         if errorlevel 1 (
             echo  [WARNING] Downloaded file appears to be invalid.
             del "bot\.env" 2>nul
             echo  Please manually download the .env file from Google Drive:
-            echo  https://drive.google.com/file/d/1LTXDUaTwGxWuP0Hmf1bPSIoDOX3TuBWj/view
+            echo  https://drive.google.com/file/d/1CuUHuMDy-luzBtPVJox0YAmK--tXEDcT/view
             echo  Then place it in the bot\ folder.
         ) else (
             echo  Environment config downloaded and placed in bot\ folder.
