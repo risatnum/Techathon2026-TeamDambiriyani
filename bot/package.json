@@ -1,0 +1,15 @@
+{
+  "name": "office-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for office monitoring system",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "discord.js": "^14.26.4",
+    "dotenv": "^17.4.2"
+  }
+}

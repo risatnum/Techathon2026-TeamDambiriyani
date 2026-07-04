@@ -1,0 +1,38 @@
+# Python virtual environments
+venv/
+.venv/
+ENV/
+backend/venv/
+simulator/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node dependencies
+node_modules/
+frontend/node_modules/
+bot/node_modules/
+
+# Environment variables & secrets
+.env
+*.env
+backend/.env
+bot/.env
+simulator/.env
+
+# IDE / Editor folders
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS generated files
+Thumbs.db
+db.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
